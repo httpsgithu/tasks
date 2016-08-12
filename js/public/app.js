@@ -607,15 +607,15 @@ angular.module('Tasks').controller('ListController', [
 			this._$scope.nameError = false;
 			this._$scope.color = '#31CC7C';
 
+			this._$scope.deleteMessage = function (calendar) {
+				return t('tasks', 'This will delete the Calendar "%s" and all of its entries.').replace('%s', calendar.displayname);
+			}
+
 			this._$scope["delete"] = function(calendar) {
-				var really;
-				really = confirm(t('tasks', 'This will delete the Calendar "%s" and all of its entries.').replace('%s', calendar.displayname));
-				if (really) {
-					return _$listsbusinesslayer["delete"](calendar).then(function() {
-						$location.path('/calendars/' + _$listsmodel.getStandardList().uri);
-						return $scope.$apply();
-					});
-				}
+				return _$listsbusinesslayer["delete"](calendar).then(function() {
+					$location.path('/calendars/' + _$listsmodel.getStandardList().uri);
+					return $scope.$apply();
+				});
 			};
 
 			this._$scope.startCreate = function() {
@@ -1454,6 +1454,30 @@ angular.module('Tasks').directive('colorpicker', function() {
 		}
 	};
 
+});
+
+angular.module('Tasks').directive('confirmation', function() {
+	'use strict';
+	return {
+		priority: -1,
+		restrict: 'A',
+		templateUrl: OC.generateUrl('/apps/tasks/templates/confirmation', {}),
+		scope: {
+			confirmationFunction: "&confirmation",
+			confirmationMessage: "&confirmationMessage",
+
+		},
+		link: function( scope, element, attrs ){
+			element.bind( 'click', function( e ){
+				// message defaults to "Are you sure?"
+				var message = scope.confirmationMessage() ? scope.confirmationMessage() : "Are you sure?";
+				// confirm() requires jQuery
+				if( confirm( message ) ) {
+					scope.confirmationFunction();
+				}
+			});
+		}
+	};
 });
 
 angular.module('Tasks').directive('datepicker', function() {
